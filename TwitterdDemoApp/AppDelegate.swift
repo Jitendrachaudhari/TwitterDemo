@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import  TwitterKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,7 +17,61 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        TWTRTwitter.sharedInstance().start(withConsumerKey: consumerKey, consumerSecret: consumerSecret)
+        
+        window = UIWindow(frame: UIScreen.main.bounds)
+        
+        let sessionStore = TWTRTwitter.sharedInstance().sessionStore
+
+        if let _ = UserDefaults.standard.value(forKey: KscreenName)  as? String,let _ = sessionStore.session()?.userID
+        {
+            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userDetailsvc") as! UserDetailsViewController
+            let nv = UINavigationController(rootViewController: vc)
+            window?.rootViewController = nv
+            window?.makeKeyAndVisible()
+        }
+        else
+        {
+            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "loginvc") as! ViewController
+            let nv = UINavigationController(rootViewController: vc)
+            window?.rootViewController = nv
+            window?.makeKeyAndVisible()
+        }
         return true
+    }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool {
+        var valueTwitter: Bool = true
+        
+        
+        
+        valueTwitter =  TWTRTwitter.sharedInstance().application(app, open: url, options: options)
+        
+        
+        return valueTwitter
+    }
+    
+    func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
+        if (extensionPointIdentifier == UIApplication.ExtensionPointIdentifier.keyboard) {
+            return false
+        }
+        return true
+    }
+    
+    
+    
+    func application(_ application: UIApplication,
+                     open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        var handle: Bool = true
+        
+        
+        let options: [String: AnyObject] = [UIApplication.OpenURLOptionsKey.sourceApplication.rawValue: sourceApplication as AnyObject, UIApplication.OpenURLOptionsKey.annotation.rawValue: annotation as AnyObject]
+        
+        handle = TWTRTwitter.sharedInstance().application(application, open: url, options: options)
+        
+        
+        
+        return handle
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
